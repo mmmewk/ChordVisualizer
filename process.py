@@ -62,34 +62,42 @@ def plotSampleData(frequencies = [440.0], duration=1, noise=100):
     plt.plot(xf, np.abs(fftOut[0:N//2]))
     plt.show(block=False)
 
-def plotfft(file, threshold=0.2, width=0.7, maxFrequency=700):
-    data = parse(file)
+def getfft(data):
     fftOut = fft(data['intensity'])
     N = data['N']
     fftOut = fftOut[0:N//30]
     fftOut = np.abs(fftOut)
-    fftOut = fftOut / np.max(fftOut)
+    return fftOut / np.max(fftOut)
+
+def 
+
+def plotfft(file, threshold=0.2, width=0.7, maxFrequency=700):
+    data = parse(file)
+    fftOut = getfft(data)
 
     maximaIndexes = find_peaks_cwt(fftOut, np.array([width]))
+    # 30 is a random number to crop down the data to audible range
     xf = np.linspace(0.0, data['rate'] / 30, N // 30)
-    plt.clf()
-    plt.xlim(0, 1000)
-    plt.grid()
-    plt.plot(xf, fftOut)
     notesToPlot = {}
     for index in maximaIndexes:
         frequency = xf[index]
         intensity = fftOut[index]
         if (intensity > threshold) and (maxFrequency > frequency):
-            halfsteps = getDistanceFromA4(frequency)
+            halfstepsAbsolute = getDistanceFromA4(frequency)
+            halfsteps = int(np.round(halfstepsAbsolute))
+            centsOff = (halfstepsAbsolute - halfsteps) * 100
             if (halfsteps not in notesToPlot) or (intensity > notesToPlot[halfsteps]['intensity']):
-                notesToPlot[halfsteps] = { 'frequency': frequency, 'intensity': intensity }
+                notesToPlot[halfsteps] = {
+                    'frequency': frequency,
+                    'intensity': intensity,
+                    'note': getNoteFromNote('A', halfsteps),
+                    'accuracy': centsOff,
+                }
     
     notesForTitle = []
     for halfsteps, data in notesToPlot.items():
-        note = getNoteFromNote('A', halfsteps)
-        notesForTitle = np.append(notesForTitle, note)
-        plt.text(data['frequency'], data['intensity'], note)
+        notesForTitle = np.append(notesForTitle, data['note'])
+        plt.text(data['frequency'], data['intensity'], data['note'])
 
     uniqueNotesForTitle = np.unique(notesForTitle)
 
@@ -98,6 +106,10 @@ def plotfft(file, threshold=0.2, width=0.7, maxFrequency=700):
     else: 
         plt.title(mode(notesForTitle.tolist()) + ', ' + ', '.join(uniqueNotesForTitle))
 
+    plt.clf()
+    plt.xlim(0, 1000)
+    plt.grid()
+    plt.plot(xf, fftOut)
     plt.draw()
     plt.pause(0.0001)
 

@@ -93,10 +93,11 @@ def getFrequencies(rootFrequency, progression):
 
 def getDistanceFromA4(frequency):
     multiplier = np.log2(frequency / A4)
-    return int(np.round(multiplier * 12))
+    return multiplier * 12
 
 def getClosestNote(frequency):
-    return getNoteFromNote('A', getDistanceFromA4(frequency))
+    halfsteps = int(np.round(getDistanceFromA4(frequency)))
+    return getNoteFromNote('A', halfsteps)
 
 def guessChord(notes):
     # try out each note as the root
