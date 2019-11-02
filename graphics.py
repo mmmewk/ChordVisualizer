@@ -3,9 +3,14 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import re
 
-def setAxes():
-    fig = plt.figure(figsize=(20, 5))
-    ax = fig.add_subplot(111)
+def setAxes(newfigure=True):
+    if newfigure:
+        fig = plt.figure(figsize=(20, 5))
+        ax = fig.add_subplot(111)
+    else:
+        fig = plt.gcf()
+        ax = plt.gca()
+        
     ax.set_yticks(range(1, len(Strings) + 1))
     ax.set_yticklabels(Strings)
     ax.set_ylim(0, len(Strings) + 1)

@@ -92,8 +92,8 @@ def getFrequencies(rootFrequency, progression):
     return map(lambda halfstep: rootFrequency * frequencyMultiplier(halfstep), halfsteps)
 
 def getDistanceFromA4(frequency):
-    multiplier = np.log2(frequency / A4)
-    return multiplier * 12
+    octaves = np.log2(frequency / A4)
+    return octaves * 12
 
 def getClosestNote(frequency):
     halfsteps = int(np.round(getDistanceFromA4(frequency)))
