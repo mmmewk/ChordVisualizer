@@ -99,6 +99,15 @@ def getClosestNote(frequency):
     halfsteps = int(np.round(getDistanceFromA4(frequency)))
     return getNoteFromNote('A', halfsteps)
 
+def getAccuracy(frequency):
+    halfsteps = getDistanceFromA4(frequency) % 1
+    distanceOff = np.min([halfsteps, np.abs(halfsteps - 1)])
+    return distanceOff * 100
+
+def getCleanFrequency(frequency):
+    halfsteps = int(np.round(getDistanceFromA4(frequency)))
+    return A4 * frequencyMultiplier(halfsteps)
+
 def guessChord(notes):
     # try out each note as the root
     for root in notes:

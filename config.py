@@ -1,4 +1,4 @@
-from constants import UkuleleBaseFrequency, UkuleleStrings
-Strings             = UkuleleStrings
-BaseFrequency       = UkuleleBaseFrequency
+from constants import GuitarBaseFrequency, GuitarTunings
+Strings             = GuitarTunings['Standard']
+BaseFrequency       = GuitarBaseFrequency
 HighestFret         = 18
