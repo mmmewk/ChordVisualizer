@@ -1,44 +1,7 @@
 from helpers import *
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import re
-
-def setAxes(newfigure=True):
-    if newfigure:
-        fig = plt.figure(figsize=(20, 5))
-        ax = fig.add_subplot(111)
-    else:
-        fig = plt.gcf()
-        ax = plt.gca()
-        
-    ax.set_yticks(range(1, len(Strings) + 1))
-    ax.set_yticklabels(Strings)
-    ax.set_ylim(0, len(Strings) + 1)
-
-    frets = np.linspace(0, HighestFret,HighestFret + 1)
-    halfFrets = map(lambda f: f + 0.5, frets)
-    majorPositions = map(getPhysicalPosition, frets)
-    minorPositions = map(getPhysicalPosition, halfFrets)
-    minLabels = map(lambda f: int(f), frets)
-    majLabels = map(lambda f: '', frets)
-
-    ax.set_xticklabels(minLabels, minor = True)
-    ax.set_xticklabels(majLabels, minor = False)
-    ax.tick_params(axis = 'x', which = 'minor', labelsize=20)
-
-    ax.set_xticks(majorPositions)
-    ax.set_xticks(minorPositions, minor = True)
-
-    ax.set_xlim(0, getPhysicalPosition(HighestFret))
-    ax.grid(which = 'minor', alpha = 0)
-    ax.grid(axis = 'x', which = 'major', alpha = 1, color='k', linestyle='-', linewidth=2)
-    ax.grid(axis = 'y', which = 'both', alpha = 0.7, color='brown', linestyle='-', linewidth=1)
-    ax.set_axisbelow(True)
-    gridlines = ax.get_xgridlines()
-    firstLine = gridlines[1]
-    firstLine.set_color('red')
-
-    return ax
+import r
 
 def drawNote(note, color='k', label=''):
     [Fret, String] = getInstancesOfNote(note)

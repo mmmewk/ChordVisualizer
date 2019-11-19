@@ -12,12 +12,28 @@ class Progression(object):
     self.note_order = self.blueprints[progression_type]
     self.title = progression_type.replace('-',' ').title()
     self.notes = []
-    for note in self.note_order:
-      halfsteps = ScaleNotes.index(note)
-      self.notes.append(self.root + halfsteps)
+    for scale_number in self.note_order:
+      halfsteps = ScaleNotes.index(scale_number)
+      note = self.root + halfsteps
+      self.notes.append(note)
 
   def get_frequencies(self):
     return list(map(lambda n: n.frequency, self.notes))
+
+  def get_scale_number(self, note):
+    return Note.get_scale_number(self.root, note)
+
+  @classmethod
+  def guess(cls, notes):
+    notes = list(map(Note, notes))
+    for root in notes:
+      progression = list(map(lambda note: Note.get_scale_number(root, note), notes))
+      progression = sorted(set(progression))
+      for chord_type, chord_progression in cls.blueprints.items():
+        if chord_progression == progression:
+          return str(root.note) + ' ' + chord_type.title()
+
+    return 'Unkown Chord'
 
   def __str__(self):
     return ','.join(map(lambda n: n.note, self.notes))
@@ -40,18 +56,6 @@ class Chord(Progression):
   def play(self, time=1, delay=0):
     play_multiple(self.get_frequencies(), time=time, delay=delay)
 
-  @classmethod
-  def guess(cls, notes):
-    notes = list(map(Note, notes))
-    for root in notes:
-      progression = list(map(lambda note: ScaleNotes[int(np.round(Note.get_forward_distance(root, note, metric='halfsteps')))], notes))
-      progression = sorted(set(progression))
-      for chord_type, chord_progression in cls.blueprints.items():
-        if chord_progression == progression:
-          return str(root.note) + ' ' + chord_type.title()
-
-    return 'Unkown Chord'
-
 class Scale(Progression):
   blueprints = {
     'major'              : ['1', '2', '3', '4', '5', '6', '7','8'],
@@ -65,7 +69,6 @@ class Scale(Progression):
 
   def play(self, time=1, octaves=1, reverse=False):
     self.root.play(time=time)
-    sleep(time / 2)
 
     for octave in range(0, octaves):
       for index, note in enumerate(self.notes):

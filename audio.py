@@ -1,12 +1,13 @@
 import os
 
-def play(frequency, delay=0, time=1):
-    play_multiple([frequency], time=time, delay=delay)
+def play(note, delay=0, time=1):
+    play_multiple([note], time=time, delay=delay)
 
-def play_multiple(frequencies, time=1, delay=0):
-    command = ' pluck '.join(map(str, frequencies))
+def play_multiple(note, time=1, delay=0):
+    note = Note(note)
+    command = ' pluck '.join(map(lambda n: str(n.frequency), notes))
     if delay:
-        delays = map(lambda i: str(i * delay), range(0, len(frequencies)))
+        delays = map(lambda i: str(i * delay), range(0, len(notes)))
         command += ' delay ' + ' '.join(delays)
     os.system('play -n synth %f pluck %s' % (time, command))
 

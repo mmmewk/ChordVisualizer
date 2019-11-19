@@ -2,6 +2,7 @@ import numpy as np
 from numbers import Number
 import re
 from audio import play
+from matplotlib.colors import hsv_to_rgb
 
 Notes               = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 ScaleNotes          = ['1', '2b', '2', '3b', '3', '4', '5b', '5', '6b', '6', '7b', '7', '8']
@@ -13,17 +14,17 @@ class Note(object):
   def __init__(self, data):
     if isinstance(data, Note):
       self.frequency = data.frequency
-      self.clean_frequency = data.clean_frequency
       self.note = data.note
       self.octave = data.octave
       self.accuracy = data.accuracy
+      # self.clean_frequency = data.clean_frequency
     elif isinstance(data, Number):
       self.frequency = data
       clean_note = Note.guess(self.frequency)
-      self.clean_frequency = clean_note.frequency
       self.note = clean_note.note
       self.octave = clean_note.octave
       self.accuracy = Note.get_distance(self.frequency, clean_note)
+      # self.clean_frequency = clean_note.frequency
     else:
       matches = re.search(r'([a-gA-G]#?)([0-9]+)?\+?([\-0-9\.]+)?', data)
       self.note = matches.group(1).upper() if matches.group(1) else 'A'
@@ -69,11 +70,24 @@ class Note(object):
 
   @staticmethod
   def get_forward_distance(root_note, forward_note, metric='cents'):
+    root_note = Note(root_note)
+    forward_note = Note(forward_note)
     forward_note.set_octave(root_note.octave)
     if (forward_note.frequency < root_note.frequency):
       forward_note.set_octave(forward_note.octave + 1)
 
     return Note.get_distance(root_note, forward_note, metric=metric)
+
+  @staticmethod
+  def get_scale_number(key, note):
+    return ScaleNotes[int(np.round(Note.get_forward_distance(key, note, metric='halfsteps')))]
+
+  def unique_color(self, satuation=1):
+    cents = Note.get_forward_distance(C4, self)
+    h = cents / 1200
+    s = saturation
+    v = 1 - 1.0 / np.exp(self.octave / 2)
+    return hsv_to_rgb((h,s,v))
 
   def set_octave(self, octave):
     self.octave = octave
@@ -102,8 +116,11 @@ class Note(object):
   def __mul__(self, o):
     return o * self.frequency
 
-  def __div__(self, o):
-    return o / self.frequency
+  def __truediv__(self, other):
+        return self.frequency / other
+
+  def __rtruediv__(self, other):
+      return other / self.frequency
 
   def __add__(self, o):
     if isinstance(o, Number):
