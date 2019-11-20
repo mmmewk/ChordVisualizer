@@ -5,6 +5,7 @@ import numpy as np
 class OvertoneSet(object):
   def __init__(self, note, intensity, width=0.03, accuracy_weight=50, intensity_weight=2):
     self.root = self.create_overtone(note, intensity)
+    self.max_intensity = self.root.intensity
     self.overtones = {}
     self.overtones[str(note.octave)] = self.root
     self.count = 1
@@ -50,6 +51,9 @@ class OvertoneSet(object):
         self.count += 1
 
       self.overtones[str(note.octave)] = self.create_overtone(note, intensity)
+      if intensity > self.max_intensity:
+        self.max_intensity = intensity
+        
       return True
 
     return False

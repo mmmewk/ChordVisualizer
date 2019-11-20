@@ -6,6 +6,7 @@ from matplotlib.colors import hsv_to_rgb
 
 Notes               = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 ScaleNotes          = ['1', '2b', '2', '3b', '3', '4', '5b', '5', '6b', '6', '7b', '7', '8']
+ScaleNoteNames      = ['Root', 'Minor Second', 'Second', 'Minor Third', 'Third', 'Fourth', 'Minor Fifth', 'Fifth', 'Minor Sixth', 'Sixth', 'Minor Seventh', 'Seventh', 'Octave']
 Octave              = 12
 A4                   = 440.0
 C4                   = 261.626
@@ -100,6 +101,10 @@ class Note(object):
   def scale_position(self, note):
     halfsteps = int(np.round(Note.get_forward_distance(self, Note(note), metric='halfsteps')))
     return ScaleNotes[halfsteps]
+
+  def scale_position_name(self, note):
+    halfsteps = int(np.round(Note.get_forward_distance(self, Note(note), metric='halfsteps')))
+    return ScaleNoteNames[halfsteps]
 
   def play(self, time=1):
     play(self.frequency, time=time)
