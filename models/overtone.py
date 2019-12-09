@@ -11,6 +11,6 @@ class Overtone(Note):
   def unique_color(self):
     cents = Note.get_forward_distance(C4, self)
     h = cents / 1200
-    s = self.intensity
+    s = 1
     v = 1 - 1.0 / np.exp(self.octave / 2)
     return hsv_to_rgb((h,s,v))

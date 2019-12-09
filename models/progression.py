@@ -1,4 +1,5 @@
-from models.note import Note, ScaleNotes, Octave
+from models.note import Note, Notes, ScaleNotes, Octave
+from models.frequency_range import FrequencyRange
 from audio import play, play_multiple
 from time import sleep
 import numpy as np
@@ -9,9 +10,11 @@ class Progression(object):
   def __init__(self, key, progression_type='major'):
     self.key = key
     self.root = Note(key)
-    self.note_order = self.blueprints[progression_type]
+    self.note_order = self.blueprints[progression_type.lower()]
     self.title = progression_type.replace('-',' ').title()
+    self.name = "%s %s" % (self.key, self.title)
     self.notes = []
+    self.overtone_range_cache = {}
     for scale_number in self.note_order:
       halfsteps = ScaleNotes.index(scale_number)
       note = self.root + halfsteps
@@ -22,6 +25,23 @@ class Progression(object):
 
   def get_scale_number(self, note):
     return Note.get_scale_number(self.root, note)
+
+  def overtone_ranges(self, n, accuracy):
+    key = "%d%f" % (n, accuracy)
+    if not key in self.overtone_range_cache:
+      ranges = []
+      for note in self.notes:
+        low_note = Note(note)
+        low_note.set_octave(2)
+        ranges += low_note.overtone_ranges(n, accuracy)
+      
+      self.overtone_range_cache[key] = FrequencyRange.simplify(ranges)
+
+    return self.overtone_range_cache[key]
+
+  def contains(self, frequency, n, accuracy):
+    ranges = self.overtone_ranges(n, accuracy)
+    return any(map(lambda r: r.contains(frequency), ranges))
 
   @classmethod
   def guess(cls, notes):
@@ -35,6 +55,15 @@ class Progression(object):
 
     return 'Unkown Chord'
 
+  @classmethod
+  def all(cls):
+    all_progressions = []
+    for progression_type in cls.blueprints:
+      for note in Notes:
+        all_progressions.append(cls(note, progression_type))
+    
+    return all_progressions
+  
   def __str__(self):
     return ','.join(map(lambda n: n.note, self.notes))
 
@@ -42,15 +71,15 @@ class Chord(Progression):
   blueprints = {
     'major'          : ['1','3', '5'],
     'minor'          : ['1','3b', '5'],
-    'sus4'           : ['1','4','5'],   
-    'sus2'           : ['1','2','5'],
-    'major7'         : ['1', '3', '5', '7'],
-    'minor7'         : ['1', '3b', '5', '7b'],
+    # 'sus4'           : ['1','4','5'],   
+    # 'sus2'           : ['1','2','5'],
+    # 'diminished'     : ['1', '3b', '5b'],
+    # 'major7'         : ['1', '3', '5', '7'],
+    # 'minor7'         : ['1', '3b', '5', '7b'],
     '7'              : ['1', '3', '5', '7b'],
-    '7sus4'          : ['1', '4','5', '7b'],
-    '7sus2'          : ['1','2','5', '7b'],
-    'diminished'     : ['1', '3b', '5b'],
-    'diminished7'    : ['1', '3b', '5b', '6'],
+    # '7sus4'          : ['1', '4','5', '7b'],
+    # '7sus2'          : ['1','2','5', '7b'],
+    # 'diminished7'    : ['1', '3b', '5b', '6'],
   }
 
   def play(self, time=1, delay=0):

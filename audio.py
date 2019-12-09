@@ -12,7 +12,7 @@ def play_multiple(note, time=1, delay=0):
     os.system('play -n synth %f pluck %s' % (time, command))
 
 def record(out_file, time):
-    os.system('rec -c 1 ' + str(out_file) + ' trim 0 ' + str(time))
+    os.system("rec -c 1 %s trim 0 %f " % (out_file, time))
 
 def play_file(input_file, time=None):
     command = 'play ' + str(input_file)
